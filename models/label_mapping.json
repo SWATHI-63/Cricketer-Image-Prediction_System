@@ -1,0 +1,37 @@
+{
+  "classes": [
+    "bhuvneshwar_kumar",
+    "dinesh_karthik",
+    "hardik_pandya",
+    "jasprit_bumrah",
+    "k._l._rahul",
+    "kedar_jadhav",
+    "kuldeep_yadav",
+    "mohammed_shami",
+    "ms_dhoni",
+    "ravindra_jadeja",
+    "rohit_sharma",
+    "shikhar_dhawan",
+    "vijay_shankar",
+    "virat_kohli",
+    "yuzvendra_chahal"
+  ],
+  "class_to_name": {
+    "0": "Bhuvneshwar Kumar",
+    "1": "Dinesh Karthik",
+    "2": "Hardik Pandya",
+    "3": "Jasprit Bumrah",
+    "4": "K. L. Rahul",
+    "5": "Kedar Jadhav",
+    "6": "Kuldeep Yadav",
+    "7": "Mohammed Shami",
+    "8": "Ms Dhoni",
+    "9": "Ravindra Jadeja",
+    "10": "Rohit Sharma",
+    "11": "Shikhar Dhawan",
+    "12": "Vijay Shankar",
+    "13": "Virat Kohli",
+    "14": "Yuzvendra Chahal"
+  },
+  "model_type": "knn"
+}

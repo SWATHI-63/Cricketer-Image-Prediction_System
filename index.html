@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict - CrickAI Prediction System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="predict-styles.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+    </div>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <a href="home.html" class="logo">Crick<span>AI</span></a>
+        <div class="nav-links">
+            <a href="home.html">Home</a>
+            <a href="index.html" class="active">Predict</a>
+            <a href="#how-it-works">How It Works</a>
+        </div>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" id="closeMenu">✕</button>
+        <a href="home.html">Home</a>
+        <a href="index.html" class="active">Predict</a>
+        <a href="#how-it-works">How It Works</a>
+    </div>
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Main Container -->
+    <main class="predict-main">
+        <!-- Page Header -->
+        <header class="page-header">
+            <div class="header-tag">
+                <span class="pulse"></span>
+                AI Powered Recognition
+            </div>
+            <h1>Cricketer <span class="gradient-text">Prediction</span> System</h1>
+            <p>Upload an image to identify the cricketer, or search by name to see their photo</p>
+        </header>
+
+        <!-- Prediction Cards Container -->
+        <div class="prediction-grid">
+            
+            <!-- Card 1: Upload & Predict -->
+            <div class="prediction-card" id="uploadCard">
+                <div class="card-header">
+                    <div class="card-icon">📤</div>
+                    <h2>Upload Image</h2>
+                    <p>Drop an image to identify the cricketer</p>
+                </div>
+
+                <div class="card-body">
+                    <!-- Upload Area -->
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-content">
+                            <div class="upload-icon-wrapper">
+                                <span class="upload-emoji">📷</span>
+                                <div class="upload-pulse"></div>
+                            </div>
+                            <h3>Drop your image here</h3>
+                            <p>or click to browse</p>
+                            <span class="file-types">Supports: JPG, PNG (Max 5MB)</span>
+                        </div>
+                        <input type="file" id="imageInput" accept="image/jpeg, image/png" hidden>
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div class="preview-area" id="previewArea">
+                        <div class="preview-wrapper">
+                            <img id="imagePreview" src="" alt="Uploaded image preview">
+                            <button class="remove-image" id="removeBtn">
+                                <span>✕</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Predict Button -->
+                    <button class="action-btn predict-btn" id="predictBtn">
+                        <span class="btn-icon">🔮</span>
+                        <span class="btn-text">Predict Cricketer</span>
+                        <span class="btn-loading" id="predictLoading">
+                            <span class="spinner"></span>
+                        </span>
+                    </button>
+
+                    <!-- Result Display -->
+                    <div class="result-box" id="resultBox">
+                        <div class="result-header">
+                            <span class="result-icon">✨</span>
+                            <h4>Prediction Result</h4>
+                        </div>
+                        <div class="result-content" id="resultContent">
+                            <div class="predicted-player">
+                                <div class="player-avatar" id="predictedAvatar">🏏</div>
+                                <div class="player-details">
+                                    <span class="player-name" id="predictedName">-</span>
+                                    <span class="player-role" id="predictedRole">Upload an image to see prediction</span>
+                                </div>
+                            </div>
+                            <div class="confidence-meter" id="confidenceMeter">
+                                <div class="meter-label">
+                                    <span>Confidence</span>
+                                    <span class="confidence-value" id="confidenceValue">--%</span>
+                                </div>
+                                <div class="meter-bar">
+                                    <div class="meter-fill" id="confidenceFill"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="divider-vertical">
+                <div class="divider-line"></div>
+                <span class="divider-text">OR</span>
+                <div class="divider-line"></div>
+            </div>
+
+            <!-- Card 2: Search by Name -->
+            <div class="prediction-card" id="searchCard">
+                <div class="card-header">
+                    <div class="card-icon">🔍</div>
+                    <h2>Search by Name</h2>
+                    <p>Enter a name to see the cricketer's image</p>
+                </div>
+
+                <div class="card-body">
+                    <!-- Search Input -->
+                    <div class="search-wrapper">
+                        <div class="search-input-group">
+                            <span class="search-icon">🔎</span>
+                            <input 
+                                type="text" 
+                                id="nameInput" 
+                                placeholder="Type cricketer name..."
+                                autocomplete="off"
+                                list="cricketerList"
+                            >
+                            <button class="clear-input" id="clearInput">✕</button>
+                        </div>
+                        
+                        <!-- Datalist for suggestions -->
+                        <datalist id="cricketerList">
+                            <!-- Will be populated by JavaScript -->
+                        </datalist>
+                    </div>
+
+                    <!-- Search Button -->
+                    <button class="action-btn search-btn" id="searchBtn">
+                        <span class="btn-icon">🎯</span>
+                        <span class="btn-text">Find Cricketer</span>
+                    </button>
+
+                    <!-- Search Result Display -->
+                    <div class="search-result-box" id="searchResultBox">
+                        <div class="search-result-card" id="searchResultCard">
+                            <div class="result-image-wrapper">
+                                <img id="searchImage" src="" alt="Cricketer">
+                                <div class="image-overlay">
+                                    <span>🏏</span>
+                                </div>
+                            </div>
+                            <div class="result-info">
+                                <h3 id="searchResultName">-</h3>
+                                <p id="searchResultRole">Cricketer</p>
+                                <div class="result-stats" id="resultStats">
+                                    <div class="stat">
+                                        <span class="stat-label">Images</span>
+                                        <span class="stat-value" id="imageCount">-</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-label">Accuracy</span>
+                                        <span class="stat-value" id="accuracy">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Search Tags -->
+                    <div class="quick-search">
+                        <span class="quick-label">Quick search:</span>
+                        <div class="quick-tags" id="quickTags">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <section class="how-it-works" id="how-it-works">
+            <h2>How It Works</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">📤</div>
+                    <h3>Upload Image</h3>
+                    <p>Select or drag a cricketer's photo into the upload zone</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">🤖</div>
+                    <h3>AI Analysis</h3>
+                    <p>Our deep learning model analyzes facial features</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">✨</div>
+                    <h3>Get Results</h3>
+                    <p>Receive instant prediction with confidence score</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="predict-footer">
+        <p>Built with ❤️ using Deep Learning | <a href="home.html">CrickAI</a> © 2024</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

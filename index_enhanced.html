@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrickAI - Cricketer Recognition System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #22c55e;
+            --accent: #f59e0b;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --gray: #64748b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(217, 70, 239, 0.1) 0%, transparent 50%);
+            animation: bgRotate 30s linear infinite;
+        }
+
+        @keyframes bgRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Header */
+        header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo span {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            border-radius: 50px;
+            font-size: 0.875rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-badge.offline {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .status-badge.offline .status-dot {
+            background: #ef4444;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Container */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero h1 span {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: var(--gray);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-title .icon {
+            font-size: 1.75rem;
+        }
+
+        .card-subtitle {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed rgba(99, 102, 241, 0.4);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--secondary);
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .upload-zone.has-image {
+            padding: 1rem;
+            border-style: solid;
+            border-color: var(--primary);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-zone h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-zone p {
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        /* Preview */
+        .preview-container {
+            display: none;
+            position: relative;
+        }
+
+        .preview-container.show {
+            display: block;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 36px;
+            height: 36px;
+            background: rgba(239, 68, 68, 0.9);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #ef4444;
+            transform: scale(1.1);
+        }
+
+        /* Predict Button */
+        .predict-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: var(--gradient);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .predict-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .predict-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .predict-btn .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .predict-btn.loading .spinner {
+            display: block;
+        }
+
+        .predict-btn.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results Section */
+        .results-card {
+            display: none;
+        }
+
+        .results-card.show {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-avatar {
+            width: 100px;
+            height: 100px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .result-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .result-info h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-info p {
+            color: var(--gray);
+        }
+
+        /* Confidence Meter */
+        .confidence-section {
+            margin-bottom: 2rem;
+        }
+
+        .confidence-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .confidence-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .confidence-bar {
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 6px;
+            transition: width 1s ease;
+            width: 0%;
+        }
+
+        /* Top Predictions */
+        .predictions-list {
+            list-style: none;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .prediction-item:first-child {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .prediction-name {
+            font-weight: 600;
+        }
+
+        .prediction-confidence {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        /* Cricketers Gallery */
+        .gallery-section {
+            margin-top: 3rem;
+        }
+
+        .gallery-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .cricketers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .cricketer-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cricketer-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .cricketer-avatar {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient);
+            border-radius: 50%;
+            margin: 0 auto 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            overflow: hidden;
+        }
+
+        .cricketer-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cricketer-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Loading States */
+        .loading-skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: var(--dark-light);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: toastIn 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--secondary);
+        }
+
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--accent);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            main {
+                padding: 1rem;
+            }
+
+            .hero {
+                padding: 2rem 0;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .upload-zone {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <header>
+        <div class="header-content">
+            <div class="logo">🏏 Crick<span>AI</span></div>
+            <div class="status-badge" id="statusBadge">
+                <div class="status-dot"></div>
+                <span id="statusText">Connecting...</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Cricketer <span>Recognition</span> System</h1>
+            <p>Upload any cricketer's photo and our AI will identify them instantly with high accuracy</p>
+        </section>
+
+        <section class="upload-section">
+            <!-- Upload Card -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">📤</span>
+                    Upload Image
+                </h2>
+                <p class="card-subtitle">Drop an image or click to browse</p>
+
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-content" id="uploadContent">
+                        <div class="upload-icon">📷</div>
+                        <h3>Drop your image here</h3>
+                        <p>Supports JPG, PNG (Max 5MB)</p>
+                    </div>
+                    <div class="preview-container" id="previewContainer">
+                        <img class="preview-image" id="previewImage" alt="Preview">
+                        <button class="remove-btn" id="removeBtn">✕</button>
+                    </div>
+                </div>
+                <input type="file" id="imageInput" accept="image/jpeg,image/png,image/jpg">
+
+                <button class="predict-btn" id="predictBtn" disabled>
+                    <span class="spinner"></span>
+                    <span class="btn-text">🔮 Predict Cricketer</span>
+                </button>
+            </div>
+
+            <!-- Results Card -->
+            <div class="card results-card" id="resultsCard">
+                <h2 class="card-title">
+                    <span class="icon">✨</span>
+                    Prediction Result
+                </h2>
+                <p class="card-subtitle">AI-powered recognition</p>
+
+                <div class="result-header">
+                    <div class="result-avatar" id="resultAvatar">🏏</div>
+                    <div class="result-info">
+                        <h2 id="resultName">-</h2>
+                        <p id="resultRole">Cricketer • Predicted by AI</p>
+                    </div>
+                </div>
+
+                <div class="confidence-section">
+                    <div class="confidence-header">
+                        <span>Confidence</span>
+                        <span class="confidence-value" id="confidenceValue">0%</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceFill"></div>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 1rem; color: var(--gray);">Top Predictions</h3>
+                <ul class="predictions-list" id="predictionsList">
+                    <!-- Filled by JS -->
+                </ul>
+            </div>
+        </section>
+
+        <!-- Cricketers Gallery -->
+        <section class="gallery-section">
+            <h2 class="gallery-title">
+                <span>🎯</span>
+                Recognized Cricketers
+            </h2>
+            <div class="cricketers-grid" id="cricketersGrid">
+                <!-- Filled by JS -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>🏏 CrickAI - Cricketer Recognition System | Built with TensorFlow & Flask</p>
+    </footer>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:5000';
+        let isConnected = false;
+
+        // DOM Elements
+        const uploadZone = document.getElementById('uploadZone');
+        const uploadContent = document.getElementById('uploadContent');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const imageInput = document.getElementById('imageInput');
+        const removeBtn = document.getElementById('removeBtn');
+        const predictBtn = document.getElementById('predictBtn');
+        const resultsCard = document.getElementById('resultsCard');
+        const resultAvatar = document.getElementById('resultAvatar');
+        const resultName = document.getElementById('resultName');
+        const confidenceValue = document.getElementById('confidenceValue');
+        const confidenceFill = document.getElementById('confidenceFill');
+        const predictionsList = document.getElementById('predictionsList');
+        const statusBadge = document.getElementById('statusBadge');
+        const statusText = document.getElementById('statusText');
+        const cricketersGrid = document.getElementById('cricketersGrid');
+
+        let uploadedFile = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAPIStatus();
+            initUpload();
+            loadCricketers();
+        });
+
+        // Check API Status
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch(`${API_URL}/api/status`);
+                const data = await response.json();
+                
+                if (data.model_loaded) {
+                    isConnected = true;
+                    statusBadge.classList.remove('offline');
+                    statusText.textContent = `AI Ready (${data.cricketers_count} cricketers)`;
+                    showToast('Connected to AI Model!', 'success');
+                } else {
+                    statusBadge.classList.add('offline');
+                    statusText.textContent = 'Model not trained';
+                    showToast('Model not loaded. Please train first.', 'warning');
+                }
+            } catch (error) {
+                statusBadge.classList.add('offline');
+                statusText.textContent = 'Server offline';
+                showToast('Cannot connect to server. Start the server first.', 'error');
+            }
+        }
+
+        // Load Cricketers Gallery
+        async function loadCricketers() {
+            try {
+                const response = await fetch(`${API_URL}/api/cricketers`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    cricketersGrid.innerHTML = data.cricketers.map(cricketer => `
+                        <div class="cricketer-card">
+                            <div class="cricketer-avatar">
+                                ${cricketer.sample_image 
+                                    ? `<img src="${API_URL}${cricketer.sample_image}" alt="${cricketer.name}" onerror="this.parentElement.innerHTML='🏏'">`
+                                    : '🏏'}
+                            </div>
+                            <div class="cricketer-name">${cricketer.name}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                cricketersGrid.innerHTML = '<p style="color: var(--gray); grid-column: 1/-1;">Could not load cricketers. Start the server first.</p>';
+            }
+        }
+
+        // Initialize Upload
+        function initUpload() {
+            uploadZone.addEventListener('click', () => {
+                if (!previewContainer.classList.contains('show')) {
+                    imageInput.click();
+                }
+            });
+
+            imageInput.addEventListener('change', handleFileSelect);
+
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (validateFile(file)) processFile(file);
+            });
+
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                resetUpload();
+            });
+
+            predictBtn.addEventListener('click', handlePredict);
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (validateFile(file)) processFile(file);
+        }
+
+        function validateFile(file) {
+            if (!file) return false;
+            
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!validTypes.includes(file.type)) {
+                showToast('Please upload a JPG or PNG image', 'error');
+                return false;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('File size must be less than 5MB', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function processFile(file) {
+            uploadedFile = file;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                uploadContent.style.display = 'none';
+                previewContainer.classList.add('show');
+                uploadZone.classList.add('has-image');
+                predictBtn.disabled = false;
+                resultsCard.classList.remove('show');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetUpload() {
+            uploadedFile = null;
+            imageInput.value = '';
+            previewImage.src = '';
+            uploadContent.style.display = 'block';
+            previewContainer.classList.remove('show');
+            uploadZone.classList.remove('has-image');
+            predictBtn.disabled = true;
+        }
+
+        // Handle Prediction
+        async function handlePredict() {
+            if (!uploadedFile) {
+                showToast('Please upload an image first', 'error');
+                return;
+            }
+
+            if (!isConnected) {
+                showToast('Server not connected. Please start the server.', 'error');
+                return;
+            }
+
+            predictBtn.classList.add('loading');
+            predictBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('image', uploadedFile);
+
+                const response = await fetch(`${API_URL}/api/predict`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data);
+                    showToast(`Predicted: ${data.prediction}`, 'success');
+                } else {
+                    throw new Error(data.error || 'Prediction failed');
+                }
+            } catch (error) {
+                console.error('Prediction error:', error);
+                showToast('Prediction failed. Please try again.', 'error');
+            } finally {
+                predictBtn.classList.remove('loading');
+                predictBtn.disabled = false;
+            }
+        }
+
+        // Display Results
+        function displayResults(data) {
+            resultsCard.classList.add('show');
+            
+            resultName.textContent = data.prediction;
+            confidenceValue.textContent = `${data.confidence}%`;
+            
+            // Set avatar
+            if (data.sample_image) {
+                resultAvatar.innerHTML = `<img src="${API_URL}${data.sample_image}" alt="${data.prediction}" onerror="this.parentElement.innerHTML='🏏'">`;
+            } else {
+                resultAvatar.innerHTML = '🏏';
+            }
+            
+            // Animate confidence bar
+            setTimeout(() => {
+                confidenceFill.style.width = `${data.confidence}%`;
+            }, 100);
+            
+            // Show top predictions
+            if (data.top_predictions) {
+                predictionsList.innerHTML = data.top_predictions.map((pred, idx) => `
+                    <li class="prediction-item">
+                        <span class="prediction-name">${idx + 1}. ${pred.name}</span>
+                        <span class="prediction-confidence">${pred.confidence}%</span>
+                    </li>
+                `).join('');
+            }
+
+            // Scroll to results
+            resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}</span>
+                <span>${message}</span>
+            `;
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
